@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,23 +7,30 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float runSpeed = 0f;
     [SerializeField] private float jumpSpeed = 0f;
     [SerializeField] private LayerMask floorLayerMask;
+    [SerializeField] private CameraShake cameraShake;
 
     [SerializeField] private float forceIncrease = 5f;
     [SerializeField] private float maxForce = 500f;
     [SerializeField] private float startDashTime;
     [SerializeField] private float throwBackForce = 20f;
-    private float force = 0;
+    [SerializeField] private AudioClip dashSound;
+    [SerializeField] private AudioClip chargeDashSound;
 
     private bool isDashing = false;
     private bool canDash = true;
     private bool canDoubleJump = true;
     private bool canDoInput = true;
+    private bool playedAudio;
+    private int direction;
+    private float dashTime;
+    private float force = 0;
+
 
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider2d;
+    private AudioSource audioSource;
+    
 
-    private int direction;
-    private float dashTime;
 
     //animation
     private bool idle;
@@ -40,6 +46,7 @@ public class PlayerController : MonoBehaviour
         boxCollider2d = GetComponent<BoxCollider2D>();
         direction = 1;
         dashTime = startDashTime;
+        audioSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -62,8 +69,15 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
+
             if (canDash)
             {
+                /*if (!playedAudio)
+                {
+                    audioSource.clip = chargeDashSound;
+                    audioSource.Play();
+                    playedAudio = true;
+                }*/
                 ChargeDash();
             }
         }
@@ -169,7 +183,15 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
+            audioSource.clip = dashSound;
+            audioSource.Play();
+            playedAudio = false; //resets charge sound
+
             dashTime -= Time.deltaTime;
+
+            cameraShake.doShake = true;
+
+
 
             if (direction == 1)
             {
