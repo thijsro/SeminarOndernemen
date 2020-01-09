@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float throwBackForce = 20f;
     private float force = 0;
 
-    private bool isDashing;
+    private bool isDashing = false;
     private bool canDash = true;
     private bool canDoubleJump = true;
     private bool canDoInput = true;
@@ -25,16 +26,27 @@ public class PlayerController : MonoBehaviour
     private int direction;
     private float dashTime;
 
+    //animation
+    private bool idle;
+    private bool run;
+    private bool jump;
+    private bool fall;
+    private bool backonitsfeet;
+    private bool dash;
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<BoxCollider2D>();
         direction = 1;
+        dashTime = startDashTime;
     }
 
     // Update is called once per frame
     void Update()
     {
+        Input.GetAxisRaw("Horizontal");
+
         if (isGrounded())
         {
             canDoInput = true;
@@ -42,18 +54,10 @@ public class PlayerController : MonoBehaviour
             canDash = true;
         }
 
-        Input.GetAxisRaw("Horizontal");
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
             Jump();
-        }
-
-        CheckDirection();
-
-        if (isDashing)
-        {
-            Dash();
         }
 
         if (Input.GetKey(KeyCode.LeftShift))
@@ -63,16 +67,95 @@ public class PlayerController : MonoBehaviour
                 ChargeDash();
             }
         }
-        /*else if (Input.GetKeyUp(KeyCode.LeftShift))
+
+        if (isDashing)
         {
-            if (canDash)
-            {
-                Dash();
-            }
-        }*/            
-        else if(!isDashing)
+            Dash();
+        }
+        else if (!isDashing)
         {
             rb.isKinematic = false;
+        }
+
+        CheckDirection();
+
+        Debug.Log("can double jump:" + canDoubleJump);
+        Debug.Log("isgrounded" + isGrounded());
+
+        AnimationManager();
+
+
+    }
+
+    private void AnimationManager()
+    {
+        if (idle)
+        {
+            //play idle
+        }
+        else if (run)
+        {
+            //play run
+        }
+        else if (jump)
+        {
+            //play jump
+        }
+        else if (dash)
+        {
+            //play dash
+        }
+        else if (fall)
+        {
+            //play fall
+        }
+        else if (backonitsfeet)
+        {
+            //play backonitsfeet
+        }
+    }
+
+    // Move the player 
+    private void FixedUpdate()
+    {
+        if (canDoInput)
+        {
+            Move();
+        }
+    }
+    private void Move()
+    {
+        float move = Input.GetAxis("Horizontal");
+        rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
+    }
+
+    private void Jump()
+    {
+        if (isGrounded())
+        {
+            rb.velocity = Vector2.up * jumpSpeed; // Jump
+        }
+        else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
+        {
+            rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
+            canDoubleJump = false;
+        }
+    }
+
+    private void ChargeDash()
+    {
+        if (!isDashing)
+        {
+            canDoInput = false;
+            rb.isKinematic = true;
+            rb.velocity = new Vector2(0, 0); // STILL STAAN
+            force += forceIncrease;
+
+            if (force > maxForce)
+            {
+                isDashing = true;
+                force = maxForce;
+            }
         }
     }
 
@@ -104,9 +187,9 @@ public class PlayerController : MonoBehaviour
         dashTime = startDashTime;
         isDashing = false;
         rb.velocity = Vector2.zero;
-        force = 0;
         canDoInput = true;
         canDash = false;
+        force = 0;
     }
 
     private void CheckDirection()
@@ -121,56 +204,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void Jump()
-    {
-        if (isGrounded())
-        {
-            rb.velocity = Vector2.up * jumpSpeed; // Jump
-        }
-        else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
-        {
-            rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
-            canDoubleJump = false;
-        }
-    }
-
     //Check is player is on a surface
     private bool isGrounded()
     {
         RaycastHit2D raycastHit2D =  Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, 0.1f, floorLayerMask);
         return raycastHit2D.collider != null;
-    }
-
-    // Move the player 
-    private void FixedUpdate()
-    {
-        if (canDoInput)
-        {
-            Move();
-        }
-    }
-
-    private void Move()
-    {
-        float move = Input.GetAxis("Horizontal");
-        rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
-    }
-
-    private void ChargeDash()
-    {
-        if (!isDashing)
-        {
-            canDoInput = false;
-            rb.isKinematic = true;
-            rb.velocity = new Vector2(0, 0); // STILL STAAN
-            force += forceIncrease;
-
-            if (force > maxForce)
-            {
-                isDashing = true;
-                force = maxForce;
-            }
-        }
     }
 
     public void ThrowBack() 
@@ -179,5 +217,12 @@ public class PlayerController : MonoBehaviour
         canDash = false;
         canDoInput = false;
         rb.velocity = Vector2.left * throwBackForce;
+    }
+
+    public void DisableInput()
+    {
+        canDash = false;
+        canDoInput = false;
+        canDoubleJump = false;
     }
 }
