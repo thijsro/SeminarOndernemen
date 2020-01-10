@@ -1,19 +1,37 @@
 fileFormatVersion: 2
-guid: 05b195871d576d140ba08e8ff3ab00f3
+guid: 0f529b42b2e43b84e8a6edd5fd59f9f0
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 4723107735738678597
-    second: Idle_0
+      213: 4348733726236610260
+    second: BackUpItsFeed_0
   - first:
-      213: -7385789195546760866
-    second: Idle_1
+      213: -5031607763414382130
+    second: BackUpItsFeed_1
   - first:
-      213: 3234629978573100161
-    second: Idle_2
+      213: 6708794896994926120
+    second: BackUpItsFeed_2
   - first:
-      213: 6373048116405451881
-    second: Idle_3
+      213: 1342622751178553720
+    second: BackUpItsFeed_3
+  - first:
+      213: 1783993164284769810
+    second: BackUpItsFeed_4
+  - first:
+      213: 8966085698148772294
+    second: BackUpItsFeed_5
+  - first:
+      213: 2573398335965921068
+    second: BackUpItsFeed_6
+  - first:
+      213: -3190614973642272985
+    second: BackUpItsFeed_7
+  - first:
+      213: -2275214077188046614
+    second: BackUpItsFeed_8
+  - first:
+      213: -8955333720159828343
+    second: BackUpItsFeed_9
   externalObjects: {}
   serializedVersion: 10
   mipmaps:
@@ -98,85 +116,106 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Idle_0
+      name: BackUpItsFeed_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 24
         y: 0
-        width: 416
-        height: 780
+        width: 758
+        height: 728
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2870a686c7080854088e76fe39b31d27
-      internalID: 4723107735738678597
+      spriteID: b777c300460a76844831431a6ee961eb
+      internalID: 4348733726236610260
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_1
+      name: BackUpItsFeed_2
       rect:
         serializedVersion: 2
-        x: 494
+        x: 1010
         y: 0
-        width: 416
-        height: 780
+        width: 760
+        height: 728
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b58c783048d475e4db5add97ee3f2465
-      internalID: -7385789195546760866
+      spriteID: c7f55498da25c03439bfaef3741d327f
+      internalID: 6708794896994926120
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_2
+      name: BackUpItsFeed_3
       rect:
         serializedVersion: 2
-        x: 962
+        x: 2186
         y: 0
-        width: 416
-        height: 780
+        width: 389
+        height: 728
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 4d00a3f624c34cb4a906ebcf9f112532
-      internalID: 3234629978573100161
+      spriteID: 9024e207cf3e0c847b8d677b451d43c9
+      internalID: 1342622751178553720
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: Idle_3
+      name: BackUpItsFeed_4
       rect:
         serializedVersion: 2
-        x: 1430
+        x: 2853
         y: 0
-        width: 416
-        height: 780
+        width: 389
+        height: 728
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 74e37965cb2d4dd4fa48ad9db28cb439
-      internalID: 6373048116405451881
+      spriteID: 83a687ef2e8ee6541b86c4ba8598488d
+      internalID: 1783993164284769810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BackUpItsFeed_5
+      rect:
+        serializedVersion: 2
+        x: 3549
+        y: 0
+        width: 389
+        height: 728
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 72fb2239189370e4989e3b47f4a6994a
+      internalID: 8966085698148772294
       vertices: []
       indices: 
       edges: []
