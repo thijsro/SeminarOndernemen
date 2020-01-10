@@ -140,6 +140,8 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         float move = Input.GetAxis("Horizontal");
+        if(move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
+        else { GetComponent<SpriteRenderer>().flipX = false; }
         rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
     }
 
