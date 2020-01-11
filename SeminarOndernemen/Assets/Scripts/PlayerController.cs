@@ -9,33 +9,32 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask floorLayerMask;
     [SerializeField] private CameraShake cameraShake;
 
-    [SerializeField] private float forceIncrease = 5f;
-    [SerializeField] private float maxForce = 500f;
     [SerializeField] private float startDashTime;
+    [SerializeField] private float force = 250;
+    [SerializeField] private float maxForceTime = .4f;
     [SerializeField] private float throwBackForce = 20f;
     [SerializeField] private AudioClip dashSound;
     [SerializeField] private AudioClip chargeDashSound;
     [SerializeField] private AudioClip jumpSound;
 
-    private bool isDashing = false;
-    private bool canDash = true;
-    private bool canDoubleJump = true;
+    private bool playedAudio;
     private bool canDoInput = true;
     private bool firstJump = true;
-    private bool playedAudio;
-    private int direction;
+    private bool canDoubleJump = true;
+    private bool isDashing = false;
+    private bool canDash = true;
     private float dashTime;
-    private float force = 0;
+    private int direction;
 
     private float jumpTime = 0.5f;
     private float currentJumpTime;
     private bool isJumping = false;
 
+    private float currentForceTime;
 
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider2d;
     private AudioSource audioSource;
-    
 
     //animation
     private bool idle;
@@ -49,10 +48,11 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<BoxCollider2D>();
+        audioSource = GetComponent<AudioSource>();
         direction = 1;
         dashTime = startDashTime;
         currentJumpTime = jumpTime;
-        audioSource = GetComponent<AudioSource>();
+        currentForceTime = maxForceTime;
     }
 
     // Update is called once per frame
@@ -60,34 +60,12 @@ public class PlayerController : MonoBehaviour
     {
         Input.GetAxisRaw("Horizontal");
 
-        if (isGrounded())
-        {
-            canDoInput = true;
-            canDoubleJump = true;
-            canDash = true;
-            firstJump = true;
-        }
+        GroundedReset();
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            Jump();
-        }
+        Jump();
+        JumpTimer();
 
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-
-            if (canDash)
-            {
-                /*if (!playedAudio)
-                {
-                    audioSource.clip = chargeDashSound;
-                    audioSource.Play();
-                    playedAudio = true;
-                }*/
-                ChargeDash();
-            }
-        }
-
+        ChargeDash();
         if (isDashing)
         {
             Dash();
@@ -98,50 +76,7 @@ public class PlayerController : MonoBehaviour
         }
 
         CheckDirection();
-
-        Debug.Log("firstjump " + firstJump);
-
         AnimationManager();
-
-        if (isJumping)
-        {
-            currentJumpTime = Timer(currentJumpTime);
-            if(currentJumpTime <= 0)
-            {
-                isJumping = false;
-                currentJumpTime = jumpTime;
-            }
-        }
-
-        Debug.Log(isJumping);
-    }
-
-    private void AnimationManager()
-    {
-        if (idle)
-        {
-            //play idle
-        }
-        else if (run)
-        {
-            //play run
-        }
-        else if (jump)
-        {
-            //play jump
-        }
-        else if (dash)
-        {
-            //play dash
-        }
-        else if (fall)
-        {
-            //play fall
-        }
-        else if (backonitsfeet)
-        {
-            //play backonitsfeet
-        }
     }
 
     // Move the player 
@@ -152,55 +87,89 @@ public class PlayerController : MonoBehaviour
             Move();
         }
     }
+
     private void Move()
     {
         float move = Input.GetAxis("Horizontal");
-        if(move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
-        else if(move>0) { GetComponent<SpriteRenderer>().flipX = false; }
+        if (move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
+        else if (move > 0) { GetComponent<SpriteRenderer>().flipX = false; }
         rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
+    }
+
+    private void GroundedReset()
+    {
+        if (isGrounded())
+        {
+            canDoInput = true;
+            canDoubleJump = true;
+            canDash = true;
+            firstJump = true;
+        }
     }
 
     private void Jump()
     {
-        if (firstJump && !isJumping && !isDashing) // TODO Make player jump twice 
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.velocity = Vector2.up * jumpSpeed; // Jump
-            audioSource.clip = jumpSound;
-            audioSource.Play();
-            isJumping = true;
-            firstJump = false;
+            if (firstJump && !isJumping && !isDashing) // TODO Make player jump twice 
+            {
+                rb.velocity = Vector2.up * jumpSpeed; // Jump
+                audioSource.clip = jumpSound;
+                audioSource.Play();
+                isJumping = true;
+                firstJump = false;
 
+            }
+            else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
+            {
+                rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
+                canDoubleJump = false;
+                firstJump = false;
+                audioSource.clip = jumpSound;
+                audioSource.Play();
+            }
         }
-        else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
+    }
+
+    private void JumpTimer()
+    {
+        if (isJumping)
         {
-            rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
-            canDoubleJump = false;
-            firstJump = false;
-            audioSource.clip = jumpSound;
-            audioSource.Play();
+            currentJumpTime = Timer(currentJumpTime);
+            if (currentJumpTime <= 0)
+            {
+                isJumping = false;
+                currentJumpTime = jumpTime;
+            }
         }
     }
 
     private void ChargeDash()
     {
-        if (!isDashing)
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            canDoInput = false;
-            rb.isKinematic = true;
-            rb.velocity = new Vector2(0, 0); // STILL STAAN
-            force += forceIncrease;
-
-            if (force > maxForce)
+            if (canDash)
             {
-                isDashing = true;
-                force = maxForce;
+                if (!isDashing)
+                {
+                    canDoInput = false;
+                    rb.isKinematic = true;
+                    rb.velocity = new Vector2(0, 0); // STILL STAAN
+
+                    currentForceTime = Timer(currentForceTime);
+
+                    if (currentForceTime <= 0)
+                    {
+                        isDashing = true;
+                        currentForceTime = maxForceTime;
+                    }
+                }
             }
         }
     }
 
     private void Dash()
     {
-        Debug.Log("isDashing");
         rb.isKinematic = false;
         if (dashTime <= 0)
         {
@@ -234,7 +203,6 @@ public class PlayerController : MonoBehaviour
         rb.velocity = Vector2.zero;
         canDoInput = true;
         canDash = false;
-        force = 0;
     }
 
     private void CheckDirection()
@@ -256,11 +224,41 @@ public class PlayerController : MonoBehaviour
         return raycastHit2D.collider != null;
     }
 
+    private void AnimationManager()
+    {
+        if (idle)
+        {
+            //play idle
+        }
+        else if (run)
+        {
+            //play run
+        }
+        else if (jump)
+        {
+            //play jump
+        }
+        else if (dash)
+        {
+            //play dash
+        }
+        else if (fall)
+        {
+            //play fall
+        }
+        else if (backonitsfeet)
+        {
+            //play backonitsfeet
+        }
+    }
+
     public void ThrowBack() 
     {
         Debug.Log("throwback");
         canDash = false;
         canDoInput = false;
+        firstJump = false;
+        canDoubleJump = false;
         rb.velocity = Vector2.left * throwBackForce;
     }
 
