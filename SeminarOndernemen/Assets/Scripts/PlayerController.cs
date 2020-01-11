@@ -15,22 +15,27 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float throwBackForce = 20f;
     [SerializeField] private AudioClip dashSound;
     [SerializeField] private AudioClip chargeDashSound;
+    [SerializeField] private AudioClip jumpSound;
 
     private bool isDashing = false;
     private bool canDash = true;
     private bool canDoubleJump = true;
     private bool canDoInput = true;
+    private bool firstJump = true;
     private bool playedAudio;
     private int direction;
     private float dashTime;
     private float force = 0;
+
+    private float jumpTime = 0.5f;
+    private float currentJumpTime;
+    private bool isJumping = false;
 
 
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider2d;
     private AudioSource audioSource;
     
-
 
     //animation
     private bool idle;
@@ -46,6 +51,7 @@ public class PlayerController : MonoBehaviour
         boxCollider2d = GetComponent<BoxCollider2D>();
         direction = 1;
         dashTime = startDashTime;
+        currentJumpTime = jumpTime;
         audioSource = GetComponent<AudioSource>();
     }
 
@@ -59,8 +65,8 @@ public class PlayerController : MonoBehaviour
             canDoInput = true;
             canDoubleJump = true;
             canDash = true;
+            firstJump = true;
         }
-
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -93,12 +99,21 @@ public class PlayerController : MonoBehaviour
 
         CheckDirection();
 
-        Debug.Log("can double jump:" + canDoubleJump);
-        Debug.Log("isgrounded" + isGrounded());
+        Debug.Log("firstjump " + firstJump);
 
         AnimationManager();
 
+        if (isJumping)
+        {
+            currentJumpTime = Timer(currentJumpTime);
+            if(currentJumpTime <= 0)
+            {
+                isJumping = false;
+                currentJumpTime = jumpTime;
+            }
+        }
 
+        Debug.Log(isJumping);
     }
 
     private void AnimationManager()
@@ -147,14 +162,22 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        if (isGrounded())
+        if (firstJump && !isJumping && !isDashing) // TODO Make player jump twice 
         {
             rb.velocity = Vector2.up * jumpSpeed; // Jump
+            audioSource.clip = jumpSound;
+            audioSource.Play();
+            isJumping = true;
+            firstJump = false;
+
         }
         else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
         {
             rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
             canDoubleJump = false;
+            firstJump = false;
+            audioSource.clip = jumpSound;
+            audioSource.Play();
         }
     }
 
@@ -193,8 +216,6 @@ public class PlayerController : MonoBehaviour
 
             cameraShake.doShake = true;
 
-
-
             if (direction == 1)
             {
                 rb.AddForce(new Vector2(force, 0)); //Dash RIGHT
@@ -231,7 +252,7 @@ public class PlayerController : MonoBehaviour
     //Check is player is on a surface
     private bool isGrounded()
     {
-        RaycastHit2D raycastHit2D =  Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, 0.1f, floorLayerMask);
+        RaycastHit2D raycastHit2D =  Physics2D.BoxCast(boxCollider2d.bounds.center, boxCollider2d.bounds.size, 0f, Vector2.down, 0.01f, floorLayerMask);
         return raycastHit2D.collider != null;
     }
 
@@ -248,5 +269,11 @@ public class PlayerController : MonoBehaviour
         canDash = false;
         canDoInput = false;
         canDoubleJump = false;
+    }
+
+    private float Timer(float timer)
+    {
+        timer -= Time.deltaTime;
+        return timer;
     }
 }
