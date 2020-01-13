@@ -36,7 +36,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider2d;
     private AudioSource audioSource;
-    private Animator animator;
+    public Animator animator;
 
     //animation
     private bool idle;
@@ -51,7 +51,6 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<BoxCollider2D>();
         audioSource = GetComponent<AudioSource>();
-        animator = GetComponent<Animator>();
         direction = 1;
         dashTime = startDashTime;
         currentJumpTime = jumpTime;
@@ -94,6 +93,7 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         float move = Input.GetAxis("Horizontal");
+        animator.SetFloat("Speed", Mathf.Abs(move));
         if (move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
         else if (move > 0) { GetComponent<SpriteRenderer>().flipX = false; }
         horizontalMove = Mathf.Abs(move);
@@ -108,6 +108,7 @@ public class PlayerController : MonoBehaviour
             canDoubleJump = true;
             canDash = true;
             firstJump = true;
+            animator.SetBool("isJumping", false);
         }
     }
 
@@ -122,7 +123,7 @@ public class PlayerController : MonoBehaviour
                 audioSource.Play();
                 isJumping = true;
                 firstJump = false;
-                animator.SetTrigger("isJumping");
+                animator.SetBool("isJumping", true);
 
             }
             else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
@@ -132,7 +133,7 @@ public class PlayerController : MonoBehaviour
                 firstJump = false;
                 audioSource.clip = jumpSound;
                 audioSource.Play();
-                animator.SetTrigger("isJumping");
+                animator.SetBool("isJumping", true);
             }
         }
     }
@@ -161,6 +162,7 @@ public class PlayerController : MonoBehaviour
                     canDoInput = false;
                     rb.isKinematic = true;
                     rb.velocity = new Vector2(0, 0); // STILL STAAN
+                    animator.SetBool("isCharging", true);
 
                     currentForceTime = Timer(currentForceTime);
 
@@ -168,6 +170,7 @@ public class PlayerController : MonoBehaviour
                     {
                         isDashing = true;
                         currentForceTime = maxForceTime;
+                        animator.SetBool("isCharging", false);
                     }
                 }
             }
@@ -209,6 +212,7 @@ public class PlayerController : MonoBehaviour
         rb.velocity = Vector2.zero;
         canDoInput = true;
         canDash = false;
+        animator.SetBool("isCharging", false);
     }
 
     private void CheckDirection()
@@ -266,9 +270,10 @@ public class PlayerController : MonoBehaviour
         firstJump = false;
         canDoubleJump = false;
         rb.velocity = Vector2.left * throwBackForce;
+        animator.SetBool("isSliding", true);}
     }
 
-    public void DisableInput()
+public void DisableInput()
     {
         canDash = false;
         canDoInput = false;
