@@ -220,6 +220,7 @@ public class PlayerController : MonoBehaviour
         canDoInput = true;
         canDash = false;
         animator.SetBool("isCharging", false);
+        currentForceTime = maxForceTime;
     }
 
     private void CheckDirection()
