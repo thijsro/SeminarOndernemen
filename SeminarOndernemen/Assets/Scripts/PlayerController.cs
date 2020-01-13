@@ -24,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private bool isDashing = false;
     private bool canDash = true;
     private float dashTime;
+    private float horizontalMove;
     private int direction;
 
     private float jumpTime = 0.5f;
@@ -35,6 +36,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private BoxCollider2D boxCollider2d;
     private AudioSource audioSource;
+    private Animator animator;
 
     //animation
     private bool idle;
@@ -49,6 +51,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         boxCollider2d = GetComponent<BoxCollider2D>();
         audioSource = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
         direction = 1;
         dashTime = startDashTime;
         currentJumpTime = jumpTime;
@@ -93,6 +96,7 @@ public class PlayerController : MonoBehaviour
         float move = Input.GetAxis("Horizontal");
         if (move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
         else if (move > 0) { GetComponent<SpriteRenderer>().flipX = false; }
+        horizontalMove = Mathf.Abs(move);
         rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
     }
 
@@ -118,6 +122,7 @@ public class PlayerController : MonoBehaviour
                 audioSource.Play();
                 isJumping = true;
                 firstJump = false;
+                animator.SetTrigger("isJumping");
 
             }
             else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
@@ -127,6 +132,7 @@ public class PlayerController : MonoBehaviour
                 firstJump = false;
                 audioSource.clip = jumpSound;
                 audioSource.Play();
+                animator.SetTrigger("isJumping");
             }
         }
     }
@@ -232,7 +238,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (run)
         {
-            //play run
+            animator.SetFloat("Speed", horizontalMove);
         }
         else if (jump)
         {
