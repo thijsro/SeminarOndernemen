@@ -79,6 +79,7 @@ public class PlayerController : MonoBehaviour
 
         CheckDirection();
         AnimationManager();
+
     }
 
     // Move the player 
@@ -109,6 +110,8 @@ public class PlayerController : MonoBehaviour
             canDash = true;
             firstJump = true;
             animator.SetBool("isJumping", false);
+            animator.SetBool("isCharging", false);
+            animator.SetBool("isSliding", false);
         }
     }
 
@@ -174,6 +177,10 @@ public class PlayerController : MonoBehaviour
                     }
                 }
             }
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            ResetDash();
         }
     }
 
@@ -270,7 +277,10 @@ public class PlayerController : MonoBehaviour
         firstJump = false;
         canDoubleJump = false;
         rb.velocity = Vector2.left * throwBackForce;
-        animator.SetBool("isSliding", true);}
+        animator.SetBool("isSliding", true);    
+        animator.SetBool("isJumping", false);    
+        animator.SetBool("isCharging", false);    
+
     }
 
 public void DisableInput()
