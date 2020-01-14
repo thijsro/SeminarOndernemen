@@ -2,33 +2,32 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Playables;
 
 public class Ending : MonoBehaviour
 {
     [SerializeField] private PlayerController player;
-    [SerializeField] private float maxTime = 2f;
-    private float time = 0f;
 
     private bool endingStarted = false;
 
+    public PlayableDirector timeline;
+    [SerializeField] private float animationTimer;
+
     private void Start()
     {
-        time = maxTime;
+        timeline = GetComponent<PlayableDirector>();
     }
 
     private void Update()
     {
         if (endingStarted)
         {
-            //play animation
+            timeline.Play();
+            animationTimer = Timer(animationTimer);
 
-            if (time <= 0)
+            if (animationTimer <= 0)
             {
-                SceneManager.LoadScene(0);
-            }
-            else
-            {
-                time -= Time.deltaTime;
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex - 1);
             }
         }
     }
@@ -38,9 +37,15 @@ public class Ending : MonoBehaviour
         if (collision.tag == "Player")
         {
             Debug.Log("ending");
+            timeline.Play();
             endingStarted = true;
             player.DisableInput();
-            //animation
         }
+    }
+
+    private float Timer(float timer)
+    {
+        timer -= Time.deltaTime;
+        return timer;
     }
 }
