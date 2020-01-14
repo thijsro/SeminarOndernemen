@@ -40,7 +40,7 @@ public class Ending : MonoBehaviour
             Debug.Log("ending");
             endingStarted = true;
             player.DisableInput();
-
+            //animation
         }
     }
 }

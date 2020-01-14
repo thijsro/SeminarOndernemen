@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private AudioClip dashSound;
     [SerializeField] private AudioClip chargeDashSound;
     [SerializeField] private AudioClip jumpSound;
+    [SerializeField] private AudioSource runSoundSource;
 
     private bool playedAudio;
     private bool canDoInput = true;
@@ -23,6 +24,7 @@ public class PlayerController : MonoBehaviour
     private bool canDoubleJump = true;
     private bool isDashing = false;
     private bool canDash = true;
+    private bool isRunning = false;
     private float dashTime;
     private float horizontalMove;
     private int direction;
@@ -80,6 +82,18 @@ public class PlayerController : MonoBehaviour
         CheckDirection();
         AnimationManager();
 
+        if (isRunning)
+        {
+            if(runSoundSource.isPlaying == false)
+            {
+                runSoundSource.Play();
+            }
+        }
+        else
+        {
+            runSoundSource.Stop();
+        }
+
     }
 
     // Move the player 
@@ -95,8 +109,9 @@ public class PlayerController : MonoBehaviour
     {
         float move = Input.GetAxis("Horizontal");
         animator.SetFloat("Speed", Mathf.Abs(move));
-        if (move < 0) { GetComponent<SpriteRenderer>().flipX = true; }
-        else if (move > 0) { GetComponent<SpriteRenderer>().flipX = false; }
+        if (move < 0) { GetComponent<SpriteRenderer>().flipX = true; isRunning = true; }
+        else if (move > 0) { GetComponent<SpriteRenderer>().flipX = false; isRunning = false; }
+        else { isRunning = false; }
         horizontalMove = Mathf.Abs(move);
         rb.velocity = new Vector2(runSpeed * move, rb.velocity.y);
     }
@@ -180,24 +195,23 @@ public class PlayerController : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            ResetDash();
+            if (!isDashing)
+            {
+                ResetDash();
+            }
         }
     }
 
     private void Dash()
     {
         rb.isKinematic = false;
-        if (dashTime <= 0)
-        {
-            ResetDash();
-        }
-        else
+        if (dashTime > 0)
         {
             audioSource.clip = dashSound;
             audioSource.Play();
             playedAudio = false; //resets charge sound
 
-            dashTime -= Time.deltaTime;
+            dashTime = Timer(dashTime);
 
             cameraShake.doShake = true;
 
@@ -209,6 +223,10 @@ public class PlayerController : MonoBehaviour
             {
                 rb.AddForce(new Vector2(-force, 0)); //Dash LEFT
             }
+        }
+        else
+        {
+            ResetDash();
         }
     }
 
@@ -281,10 +299,9 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("isSliding", true);    
         animator.SetBool("isJumping", false);    
         animator.SetBool("isCharging", false);    
-
     }
 
-public void DisableInput()
+    public void DisableInput()
     {
         canDash = false;
         canDoInput = false;
