@@ -23,13 +23,14 @@ public class PlayerController : MonoBehaviour
     private bool firstJump = true;
     private bool canDoubleJump = true;
     private bool isDashing = false;
+    private bool canChargeDash = false;
     private bool canDash = true;
     private bool isRunning = false;
     private float dashTime;
     private float horizontalMove;
     private int direction;
 
-    private float jumpTime = 0.5f;
+    private float jumpTime = 0.1f;
     private float currentJumpTime;
     private bool isJumping = false;
 
@@ -66,18 +67,21 @@ public class PlayerController : MonoBehaviour
 
         GroundedReset();
 
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            canChargeDash = true;
+        }
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        {
+            if (!isDashing)
+            {
+                ResetDash();
+            }
+        }
+
+        //JUMP
         Jump();
         JumpTimer();
-
-        ChargeDash();
-        if (isDashing)
-        {
-            Dash();
-        }
-        else if (!isDashing)
-        {
-            rb.isKinematic = false;
-        }
 
         CheckDirection();
         AnimationManager();
@@ -99,9 +103,22 @@ public class PlayerController : MonoBehaviour
     // Move the player 
     private void FixedUpdate()
     {
+
         if (canDoInput)
         {
             Move();
+        }
+        if (canChargeDash)
+        {
+        ChargeDash();
+        }
+        if (isDashing)
+        {
+            Dash();
+        }
+        else if (!isDashing)
+        {
+            rb.isKinematic = false;
         }
     }
 
@@ -144,11 +161,10 @@ public class PlayerController : MonoBehaviour
                 animator.SetBool("isJumping", true);
 
             }
-            else if (!isGrounded() && canDoubleJump) //Check Able to Double Jump
+            else if (!isGrounded() && canDoubleJump && !firstJump) //Check Able to Double Jump
             {
                 rb.velocity = Vector2.up * jumpSpeed; //DoubleJump
                 canDoubleJump = false;
-                firstJump = false;
                 audioSource.clip = jumpSound;
                 audioSource.Play();
                 animator.SetBool("isJumping", true);
@@ -171,35 +187,26 @@ public class PlayerController : MonoBehaviour
 
     private void ChargeDash()
     {
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            if (canDash)
-            {
-                if (!isDashing)
-                {
-                    canDoInput = false;
-                    rb.isKinematic = true;
-                    rb.velocity = new Vector2(0, 0); // STILL STAAN
-                    animator.SetBool("isCharging", true);
-
-                    currentForceTime = Timer(currentForceTime);
-
-                    if (currentForceTime <= 0)
-                    {
-                        isDashing = true;
-                        currentForceTime = maxForceTime;
-                        animator.SetBool("isCharging", false);
-                    }
-                }
-            }
-        }
-        else if (Input.GetKeyUp(KeyCode.LeftShift))
+        if (canDash)
         {
             if (!isDashing)
             {
-                ResetDash();
+                canDoInput = false;
+                rb.isKinematic = true;
+                rb.velocity = new Vector2(0, 0); // STILL STAAN
+                animator.SetBool("isCharging", true);
+
+                currentForceTime = Timer(currentForceTime);
+
+                if (currentForceTime <= 0)
+                {
+                    isDashing = true;
+                    currentForceTime = maxForceTime;
+                    animator.SetBool("isCharging", false);
+                }
             }
         }
+
     }
 
     private void Dash()
@@ -218,6 +225,7 @@ public class PlayerController : MonoBehaviour
             if (direction == 1)
             {
                 rb.AddForce(new Vector2(force, 0)); //Dash RIGHT
+                Debug.Log("ik hoop dat het gewoon werkt");
             }
             else if (direction == 2)
             {
@@ -239,6 +247,7 @@ public class PlayerController : MonoBehaviour
         canDash = false;
         animator.SetBool("isCharging", false);
         currentForceTime = maxForceTime;
+        canChargeDash = false;
     }
 
     private void CheckDirection()
